@@ -1,7 +1,7 @@
 # Weather Data Visualizer
-## This java program reads weather data stored in a SQL database and render
-diagrams and weather statistics in HTML (or any format).
 
+This java program reads weather data stored in a SQL database and render
+diagrams and weather statistics in HTML (or any format).
 Freemarker is used as template language.
 
 ## Start script

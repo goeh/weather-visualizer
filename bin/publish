@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+export JAVA_HOME=/usr/lib/jvm/jdk1.6.0
+export VISUAL_HOME=/home/workspace/weather/visualizer
+
+cd $VISUAL_HOME
+$JAVA_HOME/bin/java -classpath "$VISUAL_HOME/dist/visualizer.jar:$VISUAL_HOME/lib/commons-net-1.4.1.jar:$VISUAL_HOME/lib/freemarker.jar:$VISUAL_HOME/lib/jcommon-1.0.12.jar:$VISUAL_HOME/lib/jfreechart-1.0.8a.jar:$VISUAL_HOME/lib/mysql-connector-java-5.0.5-bin.jar" se.technipelago.weather.Publisher $VISUAL_HOME/web $VISUAL_HOME/src/templates

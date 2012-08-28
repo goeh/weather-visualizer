@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin:'application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+   runtime 'mysql:mysql-connector-java:5.1.11'
+   runtime 'org.hsqldb:hsqldb:1.8.0.10'
+   compile 'commons-net:commons-net:2.2'
+   compile 'org.freemarker:freemarker:2.3.16'
+   compile 'jfree:jfreechart:1.0.12'
+}
+
+defaultTasks 'clean', 'distZip'
+
+sourceCompatibility = 1.5
+version = '1.1'
+mainClassName = 'se.technipelago.weather.Publisher'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Weather Data Visualizer', 'Implementation-Version': version, 'Main-Class' : mainClassName
+    }
+}

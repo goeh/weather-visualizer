@@ -1,0 +1,1 @@
+${timestamp?string("yyyy-MM-dd;HH:mm")};${temp_out?string("#0.0")};${wind_dir_name};${wind_avg?string("#0.0")};${dailyHighWindValue?string("#0.0")};${barometer?c};${rain_today?string("#0.0")};${hum_out?c};0;;;;;;

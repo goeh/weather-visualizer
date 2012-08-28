@@ -1,0 +1,1 @@
+<#setting locale="en_US">${timestamp?string("yyyy-MM-dd;HH:mm")};${temp_out?string("#0.0")};${wind_dir};${wind_avg?string("#0.0")};${barometer?c};${hum_out?c};${rain_rate?string("#0.0")};${solar};${uv?string("#0.0")}

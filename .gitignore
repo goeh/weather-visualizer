@@ -1,0 +1,6 @@
+/wrapper
+/.idea
+/*.iml
+/build
+/.gradle
+/*.zip

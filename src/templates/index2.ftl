@@ -63,14 +63,14 @@ google.setOnLoadCallback(initialize);
             <li>Dagens h&ouml;gsta vindhastighet: <strong>${dailyHighWindValue?string("#0.0")}</strong> m/s kl. ${dailyHighWindTime?string("HH:mm")}</li>
 	    <li>Nederb&ouml;rd i dag: <strong>${rain_today?string("#0.0")}</strong> mm</li>
             <li>Soltimmar senaste 7 dagarna: <strong>${solar_hours?string("#")}</strong> timmar</li>
-<!--
+
             <li>
-              <span title="T.o.m. DOLLAR{solligan_time?string("yyyy-MM-dd")}">
-                 Soltimmar sedan midsommar: <strong>DOLLAR{solligan?string("#")}</strong> timmar
+              <span title="T.o.m. ${solligan_time?string("yyyy-MM-dd")}">
+                 Soltimmar sedan midsommar: <strong>${solligan?string("#")}</strong> timmar
               </span>
-            &nbsp;&nbsp;<a class="readmore" style="font-size:smaller" target="_blank" href="http://svt.se/2.52851/1.1646193/solligan_2009?lid=puff_1193063&lpos=lasMer">J&auml;mf&ouml;r med SVT:s &quot;Solligan&quot;</a>
+            &nbsp;&nbsp;<a class="readmore" style="font-size:smaller" target="_blank" href="http://www.svt.se/vader/fragor_och_svar/solligan-2015">J&auml;mf&ouml;r med SVT:s &quot;Solligan&quot;</a>
             </li>
--->
+
             <li>Solen g&aring;r upp <strong>${sunrise?string("HH:mm")}</strong> och ner <strong>${sunset?string("HH:mm")}</strong>.</li>
           </ul>
 <!--

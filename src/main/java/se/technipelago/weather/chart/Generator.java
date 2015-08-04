@@ -96,9 +96,9 @@ public class Generator {
     private Connection conn;
 
     public static void main(String[] args) {
-        
+
         Generator generator = new Generator();
-        
+
         if (args.length > 0) {
             String outputDir = args[0];
             if (outputDir.endsWith("/")) {
@@ -371,14 +371,8 @@ public class Generator {
 
         map.put("solar_hours", getSolarHours(new Timespan(day7, day1)));
 
-        cal.set(Calendar.MONTH, Calendar.JUNE);
-        cal.set(Calendar.DAY_OF_MONTH, 19);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-	Date midsummer = cal.getTime();
-	cal.setTime(new Date());
+	    Date midsummer = getMidsummerEve();
+	    cal.setTime(new Date());
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
@@ -386,7 +380,7 @@ public class Generator {
         while(cal.get(Calendar.DAY_OF_WEEK) != Calendar.THURSDAY) {
             cal.add(Calendar.DAY_OF_MONTH, -1);
         }
-	Date thursday = cal.getTime();
+	    Date thursday = cal.getTime();
         if(thursday.getTime() > midsummer.getTime()) {
             map.put("solligan", getSolarHours(new Timespan(midsummer, thursday)));
             map.put("solligan_time", thursday);
@@ -395,6 +389,30 @@ public class Generator {
         }
 
         return map;
+    }
+
+    /**
+     * I Sverige är midsommardagen, helgdagen, en rörlig helgdag och infaller på lördagen mellan 20 och 26 juni.
+     * Midsommarafton infaller därför alltid dagen innan, på en fredag som inträffar mellan 19 och 25 juni.
+     *
+     * @return
+     */
+    private Date getMidsummerEve() {
+        Calendar cal = Calendar.getInstance();
+        while(cal.get(Calendar.MONTH) != Calendar.JUNE) {
+            cal.add(Calendar.MONTH, -1);
+        }
+        cal.set(Calendar.DAY_OF_MONTH, 19);
+        while(cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return cal.getTime();
     }
 
     private void setArchivedData(Map<String, Object> map) {
@@ -670,7 +688,7 @@ public class Generator {
      * Calculate wind chill.
      * The "Chilled" air temperature can also be expressed as a function of
      * wind velocity and ambient air temperature.
-     * 
+     *
      * @param tempC temperature in degrees Celcius
      * @param windSpeed wind speed in meters per second (m/s).
      * @return chilled air temperature

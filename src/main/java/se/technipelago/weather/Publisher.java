@@ -37,10 +37,10 @@ import java.util.logging.Logger;
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class Publisher {
-    
+
     private static final Logger log = Logger.getLogger(Publisher.class.getName());
     private static final String PROPERTIES_FILE = "visualizer.properties";
-    
+
     private static Properties getProperties() {
         final Properties prop = new Properties();
         InputStream fis = null;
@@ -64,7 +64,7 @@ public class Publisher {
         }
         return prop;
     }
-    
+
     public static void main(String[] args) {
         final List<File> files = new ArrayList<File>();
         String outputDir = null;
@@ -107,11 +107,13 @@ public class Publisher {
         // Upload files to web hotel.
         try {
             final Properties prop = getProperties();
-            final String host = prop.getProperty("visualizer.ftp.host", "localhost");
-            final String username = prop.getProperty("visualizer.ftp.username", "anonymous");
-            final String password = prop.getProperty("visualizer.ftp.password", "anonymous");
-            final String directory = prop.getProperty("visualizer.ftp.directory", "/");
-            new FtpTransport().sendFiles("ftp://" + username + ":" + password + "@" + host + directory, files.toArray(new File[files.size()]));
+            final String host = prop.getProperty("visualizer.ftp.host", "");
+            if(host != null && host.trim().length() > 0) {
+                final String username = prop.getProperty("visualizer.ftp.username", "anonymous");
+                final String password = prop.getProperty("visualizer.ftp.password", "anonymous");
+                final String directory = prop.getProperty("visualizer.ftp.directory", "/");
+                new FtpTransport().sendFiles("ftp://" + username + ":" + password + "@" + host + directory, files.toArray(new File[files.size()]));
+            }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Failed to upload files", e);
             throw new RuntimeException(e);

@@ -47,7 +47,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.plot.CompassPlot;
@@ -72,9 +72,9 @@ import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.GradientPaintTransformType;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.StandardGradientPaintTransformer;
+import org.jfree.chart.ui.GradientPaintTransformType;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.StandardGradientPaintTransformer;
 
 /**
  *
@@ -758,7 +758,7 @@ public class Generator {
             stmt.setTimestamp(2, sqlEnd);
             result = stmt.executeQuery();
 
-            final TimeSeries s1 = new TimeSeries(label, FixedMillisecond.class);
+            final TimeSeries s1 = new TimeSeries(label);
             while (result.next()) {
                 final java.sql.Timestamp ts = result.getTimestamp(1);
                 final long timestamp = ts.getTime();
@@ -883,7 +883,7 @@ public class Generator {
             XYDataset dataset = createHistoryDataset(period.getStartTime(), period.getEndTime(), column, title);
             JFreeChart chart = createLineChart(title + " " + period, legend, dataset);
             chart.setBackgroundPaint(VERY_LIGHT_GRAY);
-            ChartUtilities.writeChartAsPNG(out, chart, width, height);
+            ChartUtils.writeChartAsPNG(out, chart, width, height);
         } catch (SQLException e) {
             log.log(Level.SEVERE, "SQL Error", e);
         }
@@ -907,7 +907,7 @@ public class Generator {
             CategoryDataset dataset = createRainDataset(period.getStartTime(), period.getEndTime());
             JFreeChart chart = createBarChart("Nederb\u00f6rd " + period, "millimeter", dataset);
             chart.setBackgroundPaint(VERY_LIGHT_GRAY);
-            ChartUtilities.writeChartAsPNG(out, chart, width, height);
+            ChartUtils.writeChartAsPNG(out, chart, width, height);
         } catch (SQLException e) {
             log.log(Level.SEVERE, "SQL Error", e);
         }
@@ -1026,7 +1026,7 @@ public class Generator {
         OutputStream out = null;
         try {
             out = new FileOutputStream(outputDir != null ? outputDir + "/" + filename : filename);
-            ChartUtilities.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
+            ChartUtils.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
         } finally {
             if (out != null) {
                 out.close();
@@ -1113,7 +1113,7 @@ public class Generator {
         OutputStream out = null;
         try {
             out = new FileOutputStream(outputDir != null ? outputDir + "/" + filename : filename);
-            ChartUtilities.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
+            ChartUtils.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
         } finally {
             if (out != null) {
                 out.close();
@@ -1137,7 +1137,7 @@ public class Generator {
         OutputStream out = null;
         try {
             out = new FileOutputStream(outputDir != null ? outputDir + "/" + filename : filename);
-            ChartUtilities.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
+            ChartUtils.writeChartAsPNG(out, chart, DIAL_WIDTH, DIAL_HEIGHT);
         } finally {
             if (out != null) {
                 out.close();

@@ -10,14 +10,14 @@ dependencies {
     runtime 'org.hsqldb:hsqldb:2.3.6'
     compile 'commons-net:commons-net:3.6'
     compile 'org.freemarker:freemarker:2.3.28'
-    compile 'org.jfree:jfreechart:1.0.19'
+    compile 'org.jfree:jfreechart:1.5.0'
 }
 
 defaultTasks 'clean', 'distZip'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-version = '1.3-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = '1.3'
 mainClassName = 'se.technipelago.weather.Publisher'
 jar {
     manifest {

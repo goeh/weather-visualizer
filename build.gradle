@@ -6,18 +6,18 @@ repositories {
 }
 
 dependencies {
-   runtime 'mysql:mysql-connector-java:5.1.35'
-   runtime 'org.hsqldb:hsqldb:2.3.3'
-   compile 'commons-net:commons-net:3.4'
-   compile 'org.freemarker:freemarker:2.3.23'
-   compile 'org.jfree:jfreechart:1.0.19'
+    runtime 'mysql:mysql-connector-java:5.1.48'
+    runtime 'org.hsqldb:hsqldb:2.3.6'
+    compile 'commons-net:commons-net:3.6'
+    compile 'org.freemarker:freemarker:2.3.28'
+    compile 'org.jfree:jfreechart:1.0.19'
 }
 
 defaultTasks 'clean', 'distZip'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = '1.2'
+version = '1.3-SNAPSHOT'
 mainClassName = 'se.technipelago.weather.Publisher'
 jar {
     manifest {

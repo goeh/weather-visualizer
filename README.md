@@ -44,3 +44,34 @@ Put `visualizer-logging.properties` in the `weather-visualizer-1.3` directory.
     java.util.logging.SimpleFormatter.format=%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %2$s %4$s: %5$s%n
     
     se.technipelago.level = INFO
+
+## Sample HTML template (index.html)
+
+See the class `se.technipelago.weather.template.PageMaker`, it includes a hard-coded list of template names
+that it uses to merge with weather data to produce static HTML files. Templates use Freemarker syntax
+to insert weather data.
+
+    <ul>
+        <li>Temperature: <strong>${temp_out?string("#0.0")}</strong> &deg;C, feels like: <strong>${chill?string("#0.0")}</strong> &deg;C</li>
+        <li>Air pressure: <strong>${barometer}</strong> millibar and <strong>
+            <#switch bar_trend>
+              <#case -60>
+                 rapid falling.
+                 <#break>
+              <#case -20>
+                 falling.
+                 <#break>
+              <#case 0>
+                 stable.
+                 <#break>
+              <#case 20>
+                 raising.
+                 <#break>
+              <#case 60>
+                 rapid raising.
+                 <#break>
+              <#default>
+                 ?
+            </#switch>
+        </strong></li>
+    </ul>

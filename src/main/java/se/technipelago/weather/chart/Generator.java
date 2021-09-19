@@ -16,54 +16,19 @@
  */
 package se.technipelago.weather.chart;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Point;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.CompassPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.dial.DialBackground;
-import org.jfree.chart.plot.dial.DialCap;
-import org.jfree.chart.plot.dial.DialPlot;
-import org.jfree.chart.plot.dial.DialPointer;
-import org.jfree.chart.plot.dial.DialTextAnnotation;
-import org.jfree.chart.plot.dial.DialValueIndicator;
-import org.jfree.chart.plot.dial.StandardDialFrame;
-import org.jfree.chart.plot.dial.StandardDialScale;
+import org.jfree.chart.plot.dial.*;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-//import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.GradientPaintTransformType;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.StandardGradientPaintTransformer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultValueDataset;
@@ -72,12 +37,18 @@ import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.chart.ui.GradientPaintTransformType;
-import org.jfree.chart.ui.RectangleInsets;
-import org.jfree.chart.ui.StandardGradientPaintTransformer;
+
+import java.awt.*;
+import java.io.*;
+import java.sql.*;
+import java.text.*;
+import java.util.Date;
+import java.util.List;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class Generator {
@@ -94,6 +65,7 @@ public class Generator {
     private static final String PROPERTIES_FILE = "visualizer.properties";
     private String outputDir;
     private Connection conn;
+    private SqlDialect dialect;
 
     public static void main(String[] args) {
 
@@ -119,7 +91,7 @@ public class Generator {
 
     public void setOutputDirectory(final String dir) {
         outputDir = dir;
-        if(outputDir != null) {
+        if (outputDir != null) {
             new File(outputDir).mkdirs();
         }
     }
@@ -285,7 +257,7 @@ public class Generator {
         InputStream fis = null;
         try {
             File file = new File(PROPERTIES_FILE);
-            if(file.exists()) {
+            if (file.exists()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);
             } else {
@@ -308,11 +280,13 @@ public class Generator {
         if (conn == null) {
             try {
                 final Properties prop = getProperties();
-                if(outputDir == null) {
+                if (outputDir == null) {
                     setOutputDirectory(prop.getProperty("visualizer.outputDir"));
                 }
-                Class.forName(prop.getProperty("visualizer.jdbc.driver", "org.hsqldb.jdbcDriver"));
-                conn = DriverManager.getConnection(prop.getProperty("visualizer.jdbc.url", "jdbc:hsqldb:file:weatherDb;shutdown=true"));
+                final String driverName = prop.getProperty("visualizer.jdbc.driver", "org.h2.Driver");
+                Class.forName(driverName);
+                conn = DriverManager.getConnection(prop.getProperty("visualizer.jdbc.url", "jdbc:h2:file:./weatherDb"));
+                dialect = initSqlDialect(driverName);
             } catch (ClassNotFoundException e) {
                 log.log(Level.SEVERE, "Cannot find JDBC driver", e);
                 throw new RuntimeException(e);
@@ -321,6 +295,13 @@ public class Generator {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private SqlDialect initSqlDialect(String driverName) {
+        if (driverName.contains("mysql")) {
+            return new MySqlDialect();
+        }
+        return new H2Dialect();
     }
 
     public void cleanup() {
@@ -371,17 +352,17 @@ public class Generator {
 
         map.put("solar_hours", getSolarHours(new Timespan(day7, day1)));
 
-	    Date midsummer = getMidsummerEve();
-	    cal.setTime(new Date());
+        Date midsummer = getMidsummerEve();
+        cal.setTime(new Date());
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
-        while(cal.get(Calendar.DAY_OF_WEEK) != Calendar.THURSDAY) {
+        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.THURSDAY) {
             cal.add(Calendar.DAY_OF_MONTH, -1);
         }
-	    Date thursday = cal.getTime();
-        if(thursday.getTime() > midsummer.getTime()) {
+        Date thursday = cal.getTime();
+        if (thursday.getTime() > midsummer.getTime()) {
             map.put("solligan", getSolarHours(new Timespan(midsummer, thursday)));
             map.put("solligan_time", thursday);
         } else {
@@ -399,11 +380,11 @@ public class Generator {
      */
     private Date getMidsummerEve() {
         Calendar cal = Calendar.getInstance();
-        while(cal.get(Calendar.MONTH) != Calendar.JUNE) {
+        while (cal.get(Calendar.MONTH) != Calendar.JUNE) {
             cal.add(Calendar.MONTH, -1);
         }
         cal.set(Calendar.DAY_OF_MONTH, 19);
-        while(cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
 
@@ -514,7 +495,7 @@ public class Generator {
     private float getSolarHours(final Timespan period) {
         PreparedStatement stmt = null;
         ResultSet result = null;
-	float f = 0f;
+        float f = 0f;
 
         init();
 
@@ -544,7 +525,7 @@ public class Generator {
                 }
             }
         }
-	return f;
+        return f;
     }
 
     private boolean setHiLowData(Date from, Date to, String column, boolean max, Map<String, Object> map, String key) {
@@ -650,8 +631,9 @@ public class Generator {
         }
         return value;
     }
+
     public static final String[] WIND_DIRECTION_NAMES = {"N", "NNO", "NO", "ONO", "O",
-        "OSO", "SO", "SSO", "S", "SSV", "SV", "VSV", "V", "VNV", "NV", "NNV"
+            "OSO", "SO", "SSO", "S", "SSV", "SV", "VSV", "V", "VNV", "NV", "NNV"
     };
     public static final int[] WIND_DIRECTION_DEGREES = new int[16];
 
@@ -689,7 +671,7 @@ public class Generator {
      * The "Chilled" air temperature can also be expressed as a function of
      * wind velocity and ambient air temperature.
      *
-     * @param tempC temperature in degrees Celcius
+     * @param tempC     temperature in degrees Celcius
      * @param windSpeed wind speed in meters per second (m/s).
      * @return chilled air temperature
      */
@@ -709,8 +691,9 @@ public class Generator {
     /**
      * TODO This version does not work, the formula is incorrect
      * interpreted from http://www.gorhamschaffler.com/humidity_formulas.htm
+     *
      * @param tempC temperature in Celcius
-     * @param RH relative humidity in percent (100% = 100)
+     * @param RH    relative humidity in percent (100% = 100)
      * @return heat index or apparent temperature
      */
     private float calculateHeatIndex(float tempC, int RH) {
@@ -723,6 +706,7 @@ public class Generator {
 
     /**
      * Convert degrees Celcius to degrees Fahrenheit.
+     *
      * @param celcius the temperature in Celcius.
      * @return the temperature in Fahrenheit.
      */
@@ -732,6 +716,7 @@ public class Generator {
 
     /**
      * Convert degrees Fahrenheit to degrees Celcius.
+     *
      * @param f the temperature in Fahrenheit.
      * @return the temperature in Celcius.
      */
@@ -750,9 +735,9 @@ public class Generator {
             if (spanDays < 100) {
                 stmt = conn.prepareStatement("SELECT ts, " + column + " FROM archive WHERE " + column + " IS NOT NULL AND ts BETWEEN ? AND ? ORDER BY ts");
             } else if (spanDays < 1000) {
-                stmt = conn.prepareStatement("SELECT date_format(ts, '%Y-%m-%d %H:00:00') AS day, AVG(" + column + ") AS value FROM archive WHERE " + column + " IS NOT NULL AND ts BETWEEN ? AND ? GROUP BY 1");
+                stmt = conn.prepareStatement(dialect.selectGroupedByHour(column));
             } else {
-                stmt = conn.prepareStatement("SELECT date_format(ts, '%Y-%m-%d') AS day, AVG(" + column + ") AS value FROM archive WHERE " + column + " IS NOT NULL AND ts BETWEEN ? AND ? GROUP BY 1");
+                stmt = conn.prepareStatement(dialect.selectGroupedByDay(column));
             }
             stmt.setTimestamp(1, sqlBegin);
             stmt.setTimestamp(2, sqlEnd);
@@ -784,6 +769,7 @@ public class Generator {
 
         return dataset;
     }
+
     private static final DateFormat YMD = new SimpleDateFormat("yyyy-MM-dd");
     private static final DateFormat M = new SimpleDateFormat("MMM");
     private static final DateFormat DAY = new SimpleDateFormat("d");
@@ -805,10 +791,10 @@ public class Generator {
         try {
             final java.sql.Timestamp sqlBegin = new java.sql.Timestamp(begin.getTime());
             final java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
-            if(spanDays < 100) {
-                stmt = conn.prepareStatement("SELECT date_format(ts, '%Y-%m-%d') AS day, SUM(rain) AS rain FROM archive WHERE ts BETWEEN ? AND ? GROUP BY 1");
+            if (spanDays < 100) {
+                stmt = conn.prepareStatement(dialect.selectRainGroupedByDay());
             } else {
-                stmt = conn.prepareStatement("SELECT date_format(ts, '%Y-%m-15') AS day, SUM(rain) AS rain FROM archive WHERE ts BETWEEN ? AND ? GROUP BY 1");
+                stmt = conn.prepareStatement(dialect.selectRainGroupedByMonth());
             }
 
             stmt.setTimestamp(1, sqlBegin);
@@ -912,6 +898,7 @@ public class Generator {
             log.log(Level.SEVERE, "SQL Error", e);
         }
     }
+
     private static final Color VERY_LIGHT_GRAY = new Color(0xe3, 0xe6, 0xe0);
 
     private void createTemperatureDial(float temperature, int humidity, final String filename) throws IOException {

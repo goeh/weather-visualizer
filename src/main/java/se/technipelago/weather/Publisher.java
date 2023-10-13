@@ -45,7 +45,7 @@ public class Publisher {
         final Properties prop = new Properties();
         InputStream fis = null;
         try {
-            File file = new File(PROPERTIES_FILE);
+            File file = new File(System.getenv("VISUALIZER_CONFIG"), PROPERTIES_FILE);
             if(file.exists()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);

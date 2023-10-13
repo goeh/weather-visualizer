@@ -256,7 +256,7 @@ public class Generator {
         final Properties prop = new Properties();
         InputStream fis = null;
         try {
-            File file = new File(PROPERTIES_FILE);
+            File file = new File(System.getenv("VISUALIZER_CONFIG"), PROPERTIES_FILE);
             if (file.exists()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);
@@ -326,8 +326,12 @@ public class Generator {
 
         // Daily high/low values.
         //
+        Date timestamp = (Date) map.get("timestamp");
+        if (timestamp == null) {
+            throw new RuntimeException("No data!");
+        }
         Calendar cal = Calendar.getInstance();
-        cal.setTime((Date) map.get("timestamp"));
+        cal.setTime(timestamp);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);

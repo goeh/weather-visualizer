@@ -8,14 +8,13 @@ group 'se.technipelago'
 
 sourceCompatibility = 11
 targetCompatibility = 11
-def version = '1.4.0'
 mainClassName = "se.technipelago.weather.Publisher"
 
 defaultTasks 'clean', 'distZip'
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'Weather Data Visualizer', 'Implementation-Version': version, 'Main-Class' : mainClassName
+        attributes 'Implementation-Title': 'Weather Data Visualizer', 'Implementation-Version': archiveVersion, 'Main-Class' : mainClassName
     }
 }
 

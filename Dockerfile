@@ -16,10 +16,13 @@ RUN mkdir -p $VISUALIZER_HOME && unzip -d $VISUALIZER_HOME /tmp/visualizer.zip &
 ADD ./crontab.txt /etc/crontab
 RUN chmod 644 /etc/crontab
 
+ADD ./start.sh $VISUALIZER_HOME/start.sh
+RUN chmod 750 $VISUALIZER_HOME/start.sh
+
 ADD ./entrypoint.sh /entrypoint.sh
 RUN chmod 750 /entrypoint.sh
 RUN mkdir -p /root/.ssh
 RUN chmod 755 /root/.ssh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["cron","-f", "-l", "2"]
+CMD ["cron", "-f", "-l", "2"]

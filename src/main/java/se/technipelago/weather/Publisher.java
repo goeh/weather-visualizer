@@ -19,21 +19,16 @@ package se.technipelago.weather;
 import se.technipelago.weather.chart.Generator;
 import se.technipelago.weather.ftp.FtpTransport;
 import se.technipelago.weather.template.PageMaker;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class Publisher {
@@ -46,7 +41,7 @@ public class Publisher {
         InputStream fis = null;
         try {
             File file = new File(System.getenv("VISUALIZER_CONFIG"), PROPERTIES_FILE);
-            if(file.exists()) {
+            if (file.exists()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);
             } else {
@@ -89,26 +84,27 @@ public class Publisher {
         //}
         // Since we fetch data from the weather station every 10 minutes and we
         // upload new pages to Internet after 3 minutes, we consider the HTML page
-        // stale after 15 minutes. Therefore we add an Date object that we can
+        // stale after 15 minutes, therefore we add a Date object that we can
         // use in the 'Expires' HTTP header.
         Date timestamp = (Date) data.get("timestamp");
         if (timestamp != null) {
             Date expires = new Date(timestamp.getTime() + 1000 * 60 * 15);
             data.put("expires", expires);
         }
-        // Generate HTML files.
-        final PageMaker pm = new PageMaker();
-        pm.setTemplateDirectory(args[1]);
-        pm.setOutputDirectory(outputDir);
-        add(files, pm.generateHTML(data), outputDir);
 
-        generator.cleanup();
-
-        // Upload files to web hotel.
         try {
+            // Generate HTML files.
+            final PageMaker pm = new PageMaker();
+            pm.setTemplateDirectory(args[1]);
+            pm.setOutputDirectory(outputDir);
+            add(files, pm.generateHTML(data), outputDir);
+
+            generator.cleanup();
+
+            // Upload files to web hotel.
             final Properties prop = getProperties();
             final String host = prop.getProperty("visualizer.ftp.host", "");
-            if(host != null && host.trim().length() > 0) {
+            if (host != null && host.trim().length() > 0) {
                 final String username = prop.getProperty("visualizer.ftp.username", "anonymous");
                 final String password = prop.getProperty("visualizer.ftp.password", "anonymous");
                 final String directory = prop.getProperty("visualizer.ftp.directory", "/");

@@ -18,21 +18,19 @@ package se.technipelago.weather.template;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.Template;
+import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class PageMaker {
@@ -40,7 +38,7 @@ public class PageMaker {
     private static final Logger log = Logger.getLogger(PageMaker.class.getName());
     private String templateDir;
     private String outputDir;
-    
+
     public void setTemplateDirectory(final String dir) {
         this.templateDir = dir;
     }
@@ -48,8 +46,17 @@ public class PageMaker {
     public void setOutputDirectory(final String dir) {
         this.outputDir = dir;
     }
-    
-    public String[] generateHTML(Map<String, Object> data) {
+
+    public String[] generateHTML(Map<String, Object> data) throws IOException {
+        Locale locale = Locale.getDefault();
+        Configuration cfg = new Configuration();
+        cfg.setDirectoryForTemplateLoading(new File(templateDir));
+        cfg.setObjectWrapper(new DefaultObjectWrapper());
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setOutputEncoding("UTF-8");
+        cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+        cfg.setSharedVariable("locale", new SimpleScalar(locale.toString()));
+        cfg.setSharedVariable("lang", new SimpleScalar(locale.getLanguage()));
 
         List<String> files = new ArrayList<String>();
         try {
@@ -58,22 +65,22 @@ public class PageMaker {
             //files.add("index.htm");
             //generatePage(data, "history.ftl", "history.htm");
             //files.add("history.htm");
-            generatePage(data, "raw.ftl", "raw.htm");
+            generatePage(data, cfg, "raw.ftl", "raw.htm");
             files.add("raw.htm");
-            generatePage(data, "raw.ftl", "raw.txt");
+            generatePage(data, cfg, "raw.ftl", "raw.txt");
             files.add("raw.txt");
-            generatePage(data, "swedweather.ftl", "swedweather.txt");
+            generatePage(data, cfg, "swedweather.ftl", "swedweather.txt");
             files.add("swedweather.txt");
             //generatePage(data, "select.ftl", "select.php");
             //files.add("select.php");
             // CommunityLib / Mainloop
-            generatePage(data, "history2.ftl", "history2.htm");
+            generatePage(data, cfg, "history2.ftl", "history2.htm");
             files.add("history2.htm");
-            generatePage(data, "select2.ftl", "select2.php");
+            generatePage(data, cfg, "select2.ftl", "select2.php");
             files.add("select2.php");
-            generatePage(data, "compact.ftl", "compact.txt");
+            generatePage(data, cfg, "compact.ftl", "compact.txt");
             files.add("compact.txt");
-            generatePage(data, "index2.ftl", "index2.txt");
+            generatePage(data, cfg, "index2.ftl", "index2.txt");
             files.add("index2.txt");
         } catch (IOException e) {
             log.log(Level.SEVERE, "I/O Error", e);
@@ -82,21 +89,12 @@ public class PageMaker {
         return files.toArray(new String[files.size()]);
     }
 
-    public void generatePage(final Map<String, Object> data, final String template, final String filename) throws IOException {
-        Configuration cfg = new Configuration();
-        cfg.setDirectoryForTemplateLoading(new File(templateDir));
-        cfg.setObjectWrapper(new DefaultObjectWrapper());
-
-        Template temp = cfg.getTemplate(template);
-
-        Writer out = new OutputStreamWriter(new FileOutputStream(outputDir != null ? outputDir + "/" + filename : filename), "utf8");
-        try {
-            temp.process(data, out);
+    public void generatePage(final Map<String, Object> data, final Configuration cfg, final String template, final String filename) throws IOException {
+        try (Writer out = new OutputStreamWriter(new FileOutputStream(outputDir != null ? outputDir + "/" + filename : filename), StandardCharsets.UTF_8)) {
+            cfg.getTemplate(template).process(data, out);
             out.flush();
         } catch (TemplateException ex) {
             log.log(Level.SEVERE, null, ex);
-        } finally {
-            out.close();
         }
     }
 }

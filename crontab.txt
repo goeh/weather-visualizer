@@ -1,0 +1,6 @@
+# Run the job every 10 minutes
+SHELL=/bin/bash
+BASH_ENV=/etc/environment
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+5,15,25,35,45,55 * * * * root /opt/weather/start.sh > /dev/null 2>&1

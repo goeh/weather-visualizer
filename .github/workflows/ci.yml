@@ -33,18 +33,18 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
 
-      - name: Log in to the Container registry with read access
+      - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.READ_PACKAGES }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build service
         run: ./gradlew
         env:
           USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ secrets.READ_PACKAGES }}
+          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive test report
         if: failure()
         uses: actions/upload-artifact@v3
@@ -52,13 +52,6 @@ jobs:
           name: test-report
           path: build/reports/tests/test/
           retention-days: 3
-
-      - name: Log in to the Container registry with write access
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -71,15 +64,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./build/docker/main
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-#      - name: Slack Notification
-#        uses: rtCamp/action-slack-notify@v2
-#        env:
-#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#          SLACK_TITLE: Build completed
-#          SLACK_MESSAGE: ${{ steps.meta.outputs.tags }}
-#          MSG_MINIMAL: ref
